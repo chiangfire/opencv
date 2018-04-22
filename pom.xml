@@ -21,6 +21,7 @@
 		<maven-antrun-plugin.version>1.8</maven-antrun-plugin.version>
 		<build-helper-maven-plugin.version>1.12</build-helper-maven-plugin.version>
 		<lifecycle-mapping.version>1.0.0</lifecycle-mapping.version>
+		<opencv-java.target>${project.basedir}/src/main/java/opencv-341.jar</opencv-java.target>
 	</properties>
 
 	<profiles>
@@ -44,6 +45,7 @@
 			</activation>
 			<build>
 				<plugins>
+				    <!-- 自动完成签名 -->
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-gpg-plugin</artifactId>
@@ -88,7 +90,7 @@
 					<target>${java.version}</target>
 				</configuration>
 			</plugin>
-
+            <!-- 抽取class从新打包 -->
 			<plugin>
 				<artifactId>maven-antrun-plugin</artifactId>
 				<version>${maven-antrun-plugin.version}</version>
@@ -98,16 +100,14 @@
 						<configuration>
 							<tasks>
 								<echo>Extracting Java classes.</echo>
-								<unjar src="${project.basedir}/opencv-java/opencv-341.jar"
-									dest="${project.build.directory}/classes">
+								<unjar src="${opencv-java.target}" dest="${project.build.directory}/classes">
 									<patternset>
 										<include name="**/*.class" />
 									</patternset>
 								</unjar>
 
 								<echo>Extracting Java sources.</echo>
-								<unjar src="${project.basedir}/opencv-java/opencv-341.jar"
-									dest="${project.build.directory}/sources">
+								<unjar src="${opencv-java.target}" dest="${project.build.directory}/sources">
 									<patternset>
 										<include name="**/*.java" />
 									</patternset>
@@ -120,7 +120,7 @@
 					</execution>
 				</executions>
 			</plugin>
-
+            <!-- 多源码目录 -->
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>build-helper-maven-plugin</artifactId>
@@ -139,7 +139,7 @@
 					</execution>
 				</executions>
 			</plugin>
-
+            <!-- source.jar 打包 -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-source-plugin</artifactId>
@@ -149,10 +149,15 @@
 						<goals>
 							<goal>jar</goal>
 						</goals>
+						<configuration>
+						    <excludes>
+						        <exclude>*.jar</exclude>
+						    </excludes>
+						</configuration>
 					</execution>
 				</executions>
 			</plugin>
-
+            <!-- 打包时自动将jar和pom安装到本地仓库 -->
 			<plugin>
 				<artifactId>maven-install-plugin</artifactId>
 				<version>${maven-install-plugin.version}</version>
@@ -160,7 +165,7 @@
 					<createChecksum>true</createChecksum>
 				</configuration>
 			</plugin>
-
+            <!-- 生成java doc -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
@@ -183,6 +188,7 @@
 		</plugins>
 		<pluginManagement>
 			<plugins>
+			    <!-- 自定义M2E生命周期 -->
 				<plugin>
 					<groupId>org.eclipse.m2e</groupId>
 					<artifactId>lifecycle-mapping</artifactId>
